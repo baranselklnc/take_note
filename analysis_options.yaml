@@ -1,1 +1,144 @@
+analyzer:
+  errors:
+    deprecated_member_use: ignore
+    deprecated_member_use_from_same_package: ignore
+    invalid_annotation_target: ignore
 include: package:flutter_lints/flutter.yaml
+
+# Custom lint rules for Take Note app
+linter:
+  rules:
+    # Code style rules
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_single_quotes: true
+    avoid_print: true
+    avoid_unnecessary_containers: true
+    avoid_web_libraries_in_flutter: true
+    prefer_typing_uninitialized_variables: true
+    
+    # Performance rules
+    avoid_function_literals_in_foreach_calls: true
+    prefer_for_elements_to_map_fromIterable: true
+    prefer_iterable_whereType: true
+    prefer_collection_literals: true
+    prefer_spread_collections: true
+    prefer_contains: true
+    prefer_is_empty: true
+    prefer_is_not_empty: true
+    
+    # Error prevention rules
+    avoid_catching_errors: true
+    avoid_renaming_method_parameters: true
+    avoid_returning_null_for_future: true
+    avoid_slow_async_io: true
+    cancel_subscriptions: true
+    close_sinks: true
+    use_build_context_synchronously: true
+    avoid_returning_null: true
+    avoid_void_async: true
+    await_only_futures: true
+    unawaited_futures: true
+    
+    # Naming conventions
+    camel_case_types: true
+    non_constant_identifier_names: true
+    constant_identifier_names: true
+    library_names: true
+    file_names: true
+    camel_case_extensions: true
+    
+    # Import and organization rules
+    avoid_relative_lib_imports: true
+    sort_unnamed_constructors_first: true
+    sort_child_properties_last: true
+    
+    # Null safety rules
+    avoid_init_to_null: true
+    prefer_null_aware_operators: true
+    prefer_if_null_operators: true
+    avoid_null_checks_in_equality_operators: true
+    null_check_on_nullable_type_parameter: true
+    
+    # Unnecessary code rules
+    unnecessary_const: true
+    unnecessary_new: true
+    unnecessary_this: true
+    unnecessary_parenthesis: true
+    unnecessary_brace_in_string_interps: true
+    unnecessary_string_interpolations: true
+    unnecessary_string_escapes: true
+    unnecessary_raw_strings: true
+    unnecessary_statements: true
+    unnecessary_await_in_return: true
+    unnecessary_null_aware_assignments: true
+    unnecessary_null_checks: true
+    unnecessary_null_in_if_null_operators: true
+    unnecessary_nullable_for_final_variable_declarations: true
+    unnecessary_overrides: true
+    unnecessary_getters_setters: true
+    unnecessary_lambdas: true
+    unnecessary_constructor_name: true
+    
+    # Disable noisy rules
+    lines_longer_than_80_chars: false
+    public_member_api_docs: false
+    always_declare_return_types: false
+    always_specify_types: false
+    prefer_relative_imports: false
+    always_put_control_body_on_new_line: false
+    always_put_required_named_parameters_first: false
+    annotate_overrides: false
+    avoid_annotating_with_dynamic: false
+    avoid_bool_literals_in_conditional_expressions: false
+    avoid_double_and_int_checks: false
+    avoid_equals_and_hash_code_on_mutable_classes: false
+    avoid_field_initializers_in_const_classes: false
+    avoid_implementing_value_types: false
+    avoid_js_rounded_ints: false
+    avoid_positional_boolean_parameters: false
+    package_api_docs: false
+    package_names: false
+    package_prefixed_library_names: false
+    parameter_assignments: false
+    prefer_adjacent_string_concatenation: false
+    prefer_asserts_in_initializer_lists: false
+    prefer_asserts_with_message: false
+    prefer_conditional_assignment: false
+    prefer_expression_function_bodies: false
+    prefer_function_declarations_over_variables: false
+    prefer_generic_function_type_aliases: false
+    prefer_if_elements_to_conditional_expressions: false
+    prefer_initializing_formals: false
+    prefer_inlined_adds: false
+    prefer_int_literals: false
+    prefer_interpolation_to_compose_strings: false
+    prefer_is_not_operator: false
+    prefer_void_to_null: false
+    provide_deprecation_message: false
+    recursive_getters: false
+    slash_for_doc_comments: false
+    sort_pub_dependencies: false
+    test_types_in_equals: false
+    throw_in_finally: false
+    tighten_type_of_initializing_formals: false
+    type_annotate_public_apis: false
+    type_init_formals: false
+    unrelated_type_equality_checks: false
+    use_full_hex_values_for_flutter_colors: false
+    use_function_type_syntax_for_parameters: false
+    use_if_null_to_convert_nulls_to_bools: false
+    use_is_even_rather_than_modulo: false
+    use_key_in_widget_constructors: false
+    use_late_for_private_fields_and_variables: false
+    use_named_constants: false
+    use_raw_strings: false
+    use_rethrow_when_possible: false
+    use_setters_to_change_properties: false
+    use_string_buffers: false
+    use_test_throws_matchers: false
+    use_to_and_as_if_applicable: false
+    valid_regexps: false
+    void_checks: false
