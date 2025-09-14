@@ -7,6 +7,7 @@ import 'viewmodels/auth_viewmodel.dart';
 import 'views/auth/login_page.dart';
 import 'views/notes/notes_list_page.dart';
 import 'core/constants/supabase_constants.dart';
+import 'services/server_discovery_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,9 @@ void main() async {
     url: SupabaseConstants.supabaseUrl,
     anonKey: SupabaseConstants.supabaseAnonKey,
   );
+  
+  // Initialize server discovery
+  await ServerDiscoveryService.initialize();
   
   // Initialize storage
   final container = ProviderContainer();
@@ -44,14 +48,69 @@ class MainApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       home: authState.when(
         data: (user) => user != null ? const NotesListPage() : const LoginPage(),
-        loading: () => const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
+        loading: () => const ServerDiscoveryScreen(),
         error: (error, stack) => const LoginPage(),
       ),
       debugShowCheckedModeBanner: false,
     );
+  }
+}
+
+class ServerDiscoveryScreen extends StatefulWidget {
+  const ServerDiscoveryScreen({super.key});
+
+  @override
+  State<ServerDiscoveryScreen> createState() => _ServerDiscoveryScreenState();
+}
+
+class _ServerDiscoveryScreenState extends State<ServerDiscoveryScreen> {
+  bool _isRetrying = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 24),
+            const Text(
+              'Sunucuya bağlanıyor...',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Bu işlem birkaç saniye sürebilir',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 32),
+            if (_isRetrying) ...[
+              const Text(
+                'Bağlantı kurulamadı',
+                style: TextStyle(fontSize: 16, color: Colors.red),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _retryConnection,
+                child: const Text('Tekrar Dene'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _retryConnection() async {
+    setState(() {
+      _isRetrying = true;
+    });
+
+    try {
+      await ServerDiscoveryService.retryDiscovery();
+    } catch (e) {
+      // Hata gösterimi için
+    }
   }
 }
