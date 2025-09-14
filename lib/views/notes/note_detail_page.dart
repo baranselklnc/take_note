@@ -124,7 +124,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 // Title
                 Text(
                   note.title,
-                  style: AppTheme.headlineMedium,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: AppConstants.smallPadding),
 
@@ -134,24 +134,24 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                     Icon(
                       Icons.access_time,
                       size: 16,
-                      color: AppTheme.textSecondary,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Created ${_formatDate(note.createdAt)}',
-                      style: AppTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                     if (note.updatedAt != note.createdAt) ...[
                       const SizedBox(width: 16),
                       Icon(
                         Icons.edit,
                         size: 16,
-                        color: AppTheme.textSecondary,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Updated ${_formatDate(note.updatedAt)}',
-                        style: AppTheme.bodySmall,
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ],
@@ -161,7 +161,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 // Content
                 Text(
                   note.content,
-                  style: AppTheme.bodyLarge,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
             ),

@@ -62,33 +62,6 @@ class _CreateNotePageState extends ConsumerState<CreateNotePage> {
     }
   }
 
-  void _discardNote() {
-    if (_titleController.text.isNotEmpty || _contentController.text.isNotEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Discard Note'),
-          content: const Text('Are you sure you want to discard this note?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
-              child: const Text('Discard'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      Navigator.of(context).pop();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
