@@ -1,13 +1,15 @@
+import '../../services/server_discovery_service.dart';
+
 /// API endpoint constants
 class ApiConstants {
-  // Base URL - Android emülatör için 10.0.2.2 kullanın
-  static const String baseUrl = 'http://10.0.2.2:8000';
+  static String get baseUrl => ServerDiscoveryService.baseUrl;
   
   // ===== CORE ENDPOINTS =====
   
   // Health & Info
   static const String root = '/';
   static const String health = '/health';
+  static const String serverInfo = '/server-info';
   
   // ===== NOTES CRUD ENDPOINTS =====
   
