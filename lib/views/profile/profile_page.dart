@@ -163,7 +163,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text(
-              'Premium Üye',
+              'TakeNoters',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 12,
