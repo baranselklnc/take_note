@@ -8,6 +8,7 @@ import 'views/auth/login_page.dart';
 import 'views/main/main_navigation_page.dart';
 import 'views/onboarding/onboarding_page.dart';
 import 'providers/onboarding_provider.dart';
+import 'providers/theme_provider.dart';
 import 'core/constants/supabase_constants.dart';
 import 'services/server_discovery_service.dart';
 
@@ -45,10 +46,13 @@ class MainApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authViewModelProvider);
     final isOnboardingCompleted = ref.watch(onboardingProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp(
       title: 'Take Note',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       home: isOnboardingCompleted
           ? authState.when(
               data: (user) => user != null ? const MainNavigationPage() : const LoginPage(),
