@@ -58,7 +58,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.largePadding),
@@ -70,21 +70,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                 // Logo/Title
-                const Icon(
+                Icon(
                   Icons.note_alt,
                   size: 80,
-                  color: AppTheme.primaryColor,
+                  color: Theme.of(context).primaryColor,
                 ),
                 const SizedBox(height: AppConstants.largePadding),
                 Text(
                   'Take Note',
-                  style: AppTheme.headlineLarge,
+                  style: Theme.of(context).textTheme.headlineLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppConstants.smallPadding),
                 Text(
                   'Sign in to your account',
-                  style: AppTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppConstants.largePadding),
@@ -182,7 +182,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   children: [
                     Text(
                       "Don't have an account? ",
-                      style: AppTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
                       onPressed: _navigateToSignup,
