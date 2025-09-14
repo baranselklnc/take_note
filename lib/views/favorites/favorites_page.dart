@@ -12,7 +12,7 @@ class FavoritesPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorites'),
+        title: const Text('Sabitlenen Notlar'),
         centerTitle: true,
         elevation: 0,
       ),
@@ -26,18 +26,18 @@ class FavoritesPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.favorite_outline,
+                    Icons.push_pin_outlined,
                     size: 64,
                     color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No favorite notes yet',
+                    'Henüz sabitlenmiş not yok',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Pin notes to see them here',
+                    'Notları sabitlemek için burada görün',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

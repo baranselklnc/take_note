@@ -92,7 +92,7 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Note'),
+        title: const Text('Notu Düzenle'),
         actions: [
           TextButton(
             onPressed: _isSaving ? null : _saveNote,
@@ -105,7 +105,7 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : const Text('Save'),
+                : const Text('Kaydet'),
           ),
         ],
       ),
@@ -160,6 +160,5 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
     );
   }
 
-  @override
   bool get wantKeepAlive => true;
 }

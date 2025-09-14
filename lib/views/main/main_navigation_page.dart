@@ -53,17 +53,17 @@ class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.notes_outlined),
               activeIcon: Icon(Icons.notes),
-              label: 'Notes',
+              label: 'Notlar',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline),
-              activeIcon: Icon(Icons.favorite),
-              label: 'Favorites',
+              icon: Icon(Icons.push_pin_outlined),
+              activeIcon: Icon(Icons.push_pin),
+              label: 'Sabitlenen',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               activeIcon: Icon(Icons.person),
-              label: 'Profile',
+              label: 'Profil',
             ),
           ],
         ),

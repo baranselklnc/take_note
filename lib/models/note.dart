@@ -10,11 +10,12 @@ class Note with _$Note {
     required String id,
     required String title,
     required String content,
-    @Default(false) bool isPinned,
-    required String userId,
-    required DateTime createdAt,
-    required DateTime updatedAt,
-    @Default(false) bool isDeleted,
+    @JsonKey(name: 'is_pinned') @Default(false) bool isPinned,
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    @JsonKey(name: 'is_deleted') @Default(false) bool isDeleted,
+    @JsonKey(name: 'deleted_at') DateTime? deletedAt,
   }) = _Note;
 
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);

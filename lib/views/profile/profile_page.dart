@@ -2,16 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 
-class ProfilePage extends ConsumerWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  // Mock data for settings
+  bool _notificationsEnabled = true;
+  bool _dataSharingEnabled = false;
+  bool _analyticsEnabled = true;
+  bool _crashReportingEnabled = false;
+  bool _marketingEmailsEnabled = false;
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).primaryColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Profil'),
         centerTitle: true,
         elevation: 0,
       ),
@@ -72,7 +97,58 @@ class ProfilePage extends ConsumerWidget {
                 
                 const SizedBox(height: 24),
                 
-                // Settings Section
+                // Notifications Section
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.notifications_outlined,
+                        title: 'Bildirimler',
+                        subtitle: 'Uygulama bildirimlerini al',
+                        trailing: Switch(
+                          value: _notificationsEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              _notificationsEnabled = value;
+                            });
+                            _showSnackBar(
+                              value 
+                                ? 'Bildirim tercihiniz aktif olarak güncellendi'
+                                : 'Bildirim tercihiniz pasif olarak güncellendi'
+                            );
+                          },
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _notificationsEnabled = !_notificationsEnabled;
+                          });
+                          _showSnackBar(
+                            _notificationsEnabled 
+                              ? 'Bildirim tercihiniz aktif olarak güncellendi'
+                              : 'Bildirim tercihiniz pasif olarak güncellendi'
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Privacy & Security Section
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
@@ -91,8 +167,8 @@ class ProfilePage extends ConsumerWidget {
                       _buildSettingsItem(
                         context,
                         icon: Icons.dark_mode_outlined,
-                        title: 'Dark Mode',
-                        subtitle: 'Switch between light and dark themes',
+                        title: 'Karanlık Mod',
+                        subtitle: 'Açık ve karanlık temalar arasında geçiş yap',
                         trailing: Switch(
                           value: Theme.of(context).brightness == Brightness.dark,
                           onChanged: (value) {
@@ -106,23 +182,121 @@ class ProfilePage extends ConsumerWidget {
                       const Divider(height: 1),
                       _buildSettingsItem(
                         context,
-                        icon: Icons.notifications_outlined,
-                        title: 'Notifications',
-                        subtitle: 'Manage your notification preferences',
-                        trailing: const Icon(Icons.chevron_right),
+                        icon: Icons.analytics_outlined,
+                        title: 'Veri Paylaşımı',
+                        subtitle: 'Güvenlik ve gizlilik için verilerimi geliştirmek için paylaşıyorum',
+                        trailing: Switch(
+                          value: _dataSharingEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              _dataSharingEnabled = value;
+                            });
+                            _showSnackBar(
+                              value 
+                                ? 'Veri paylaşımı aktif olarak güncellendi'
+                                : 'Veri paylaşımı pasif olarak güncellendi'
+                            );
+                          },
+                        ),
                         onTap: () {
-                          // TODO: Navigate to notifications settings
+                          setState(() {
+                            _dataSharingEnabled = !_dataSharingEnabled;
+                          });
+                          _showSnackBar(
+                            _dataSharingEnabled 
+                              ? 'Veri paylaşımı aktif olarak güncellendi'
+                              : 'Veri paylaşımı pasif olarak güncellendi'
+                          );
                         },
                       ),
                       const Divider(height: 1),
                       _buildSettingsItem(
                         context,
-                        icon: Icons.security_outlined,
-                        title: 'Privacy & Security',
-                        subtitle: 'Manage your privacy settings',
-                        trailing: const Icon(Icons.chevron_right),
+                        icon: Icons.analytics_outlined,
+                        title: 'Analitik Veriler',
+                        subtitle: 'Uygulama performansını iyileştirmek için analitik verileri paylaş',
+                        trailing: Switch(
+                          value: _analyticsEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              _analyticsEnabled = value;
+                            });
+                            _showSnackBar(
+                              value 
+                                ? 'Analitik veriler aktif olarak güncellendi'
+                                : 'Analitik veriler pasif olarak güncellendi'
+                            );
+                          },
+                        ),
                         onTap: () {
-                          // TODO: Navigate to privacy settings
+                          setState(() {
+                            _analyticsEnabled = !_analyticsEnabled;
+                          });
+                          _showSnackBar(
+                            _analyticsEnabled 
+                              ? 'Analitik veriler aktif olarak güncellendi'
+                              : 'Analitik veriler pasif olarak güncellendi'
+                          );
+                        },
+                      ),
+                      const Divider(height: 1),
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.bug_report_outlined,
+                        title: 'Hata Raporlama',
+                        subtitle: 'Uygulama hatalarını otomatik olarak raporla',
+                        trailing: Switch(
+                          value: _crashReportingEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              _crashReportingEnabled = value;
+                            });
+                            _showSnackBar(
+                              value 
+                                ? 'Hata raporlama aktif olarak güncellendi'
+                                : 'Hata raporlama pasif olarak güncellendi'
+                            );
+                          },
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _crashReportingEnabled = !_crashReportingEnabled;
+                          });
+                          _showSnackBar(
+                            _crashReportingEnabled 
+                              ? 'Hata raporlama aktif olarak güncellendi'
+                              : 'Hata raporlama pasif olarak güncellendi'
+                          );
+                        },
+                      ),
+                      const Divider(height: 1),
+                      _buildSettingsItem(
+                        context,
+                        icon: Icons.email_outlined,
+                        title: 'Pazarlama E-postaları',
+                        subtitle: 'Yeni özellikler ve güncellemeler hakkında e-posta al',
+                        trailing: Switch(
+                          value: _marketingEmailsEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              _marketingEmailsEnabled = value;
+                            });
+                            _showSnackBar(
+                              value 
+                                ? 'Pazarlama e-postaları aktif olarak güncellendi'
+                                : 'Pazarlama e-postaları pasif olarak güncellendi'
+                            );
+                          },
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _marketingEmailsEnabled = !_marketingEmailsEnabled;
+                          });
+                          _showSnackBar(
+                            _marketingEmailsEnabled 
+                              ? 'Pazarlama e-postaları aktif olarak güncellendi'
+                              : 'Pazarlama e-postaları pasif olarak güncellendi'
+                          );
                         },
                       ),
                     ],
@@ -139,7 +313,7 @@ class ProfilePage extends ConsumerWidget {
                       await ref.read(authViewModelProvider.notifier).logout();
                     },
                     icon: const Icon(Icons.logout),
-                    label: const Text('Logout'),
+                    label: const Text('Çıkış Yap'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.error,
                       foregroundColor: Colors.white,

@@ -37,12 +37,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Note'),
-        content: Text('Are you sure you want to delete "${note?.title}"?'),
+        title: const Text('Notu Sil'),
+        content: Text('"${note?.title}" notunu silmek istediğinizden emin misiniz?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('İptal'),
           ),
           TextButton(
             onPressed: () {
@@ -50,7 +50,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
               _deleteNote();
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
-            child: const Text('Delete'),
+            child: const Text('Sil'),
           ),
         ],
       ),
@@ -63,11 +63,28 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     // Show undo snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Note deleted'),
+        content: const Text('Not silindi'),
         action: SnackBarAction(
-          label: 'UNDO',
-          onPressed: () {
-            ref.read(notesViewModelProvider.notifier).restoreNote(widget.noteId);
+          label: 'GERİ AL',
+          onPressed: () async {
+            final success = await ref.read(notesViewModelProvider.notifier).restoreNote(widget.noteId);
+            if (success && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Not başarıyla geri yüklendi'),
+                  behavior: SnackBarBehavior.floating,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            } else if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Not geri yüklenemedi'),
+                  behavior: SnackBarBehavior.floating,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
           },
         ),
         duration: const Duration(seconds: AppConstants.undoTimeoutSeconds),
@@ -102,68 +119,71 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   color: note.isPinned ? AppTheme.primaryColor : null,
                 ),
                 onPressed: _togglePin,
-                tooltip: note.isPinned ? 'Unpin' : 'Pin',
+                tooltip: note.isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle',
               ),
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: _editNote,
-                tooltip: 'Edit',
+                tooltip: 'Düzenle',
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline),
                 onPressed: _showDeleteConfirmation,
-                tooltip: 'Delete',
+                tooltip: 'Sil',
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConstants.defaultPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title
-                Text(
-                  note.title,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: AppConstants.smallPadding),
+          body: GestureDetector(
+            onTap: _editNote,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    note.title,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: AppConstants.smallPadding),
 
-                // Metadata
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 16,
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Created ${_formatDate(note.createdAt)}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    if (note.updatedAt != note.createdAt) ...[
-                      const SizedBox(width: 16),
+                  // Metadata
+                  Row(
+                    children: [
                       Icon(
-                        Icons.edit,
+                        Icons.access_time,
                         size: 16,
                         color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Updated ${_formatDate(note.updatedAt)}',
+                        '${_formatDate(note.createdAt)} oluşturuldu',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
+                      if (note.updatedAt != note.createdAt) ...[
+                        const SizedBox(width: 16),
+                        Icon(
+                          Icons.edit,
+                          size: 16,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_formatDate(note.updatedAt)} güncellendi',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-                const SizedBox(height: AppConstants.defaultPadding),
+                  ),
+                  const SizedBox(height: AppConstants.defaultPadding),
 
-                // Content
-                Text(
-                  note.content,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
+                  // Content
+                  Text(
+                    note.content,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -172,9 +192,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stack) => Scaffold(
-        appBar: AppBar(title: const Text('Error')),
+        appBar: AppBar(title: const Text('Hata')),
         body: Center(
-          child: Text('Error loading note: $error'),
+          child: Text('Not yüklenirken hata oluştu: $error'),
         ),
       ),
     );
@@ -185,13 +205,13 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     final difference = now.difference(date);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+      return '${difference.inDays} gün${difference.inDays == 1 ? '' : ''} önce';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+      return '${difference.inHours} saat${difference.inHours == 1 ? '' : ''} önce';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
+      return '${difference.inMinutes} dk${difference.inMinutes == 1 ? '' : ''} önce';
     } else {
-      return 'Just now';
+      return 'Az önce';
     }
   }
 }

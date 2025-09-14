@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../viewmodels/notes_viewmodel.dart';
 import '../../viewmodels/search_viewmodel.dart';
 import '../../shared/widgets/note_card.dart';
-import '../../shared/widgets/search_bar.dart' as custom;
+import '../../shared/widgets/modern_search_bar.dart';
 import '../../shared/widgets/loading_widget.dart' as custom;
+import '../../shared/widgets/ai_summary_dialog.dart';
+import '../../shared/widgets/ai_tags_dialog.dart';
+import '../../shared/widgets/ai_loading_widget.dart';
 import '../../models/note.dart';
 import 'create_note_page.dart';
 import 'note_detail_page.dart';
@@ -17,17 +21,49 @@ class NotesListPage extends ConsumerStatefulWidget {
 }
 
 class _NotesListPageState extends ConsumerState<NotesListPage> {
-  bool _isSearching = false;
+  bool _isSummarizing = false;
+  bool _isAutoTagging = false;
 
-  void _toggleSearch() {
-    setState(() {
-      _isSearching = !_isSearching;
-    });
-    
-    if (!_isSearching) {
-      final allNotes = ref.read(notesViewModelProvider).value ?? [];
-      ref.read(searchViewModelProvider.notifier).clearSearch(allNotes);
-    }
+  void _onSearch(String query, SearchType searchType) {
+    final allNotes = ref.read(notesViewModelProvider).value ?? [];
+    ref.read(searchViewModelProvider.notifier).searchNotes(query, allNotes);
+  }
+
+  void _onClearSearch() {
+    final allNotes = ref.read(notesViewModelProvider).value ?? [];
+    ref.read(searchViewModelProvider.notifier).clearSearch(allNotes);
+  }
+
+  void _showAiSummaryDialog(Map<String, dynamic> result, Note note) {
+    showDialog(
+      context: context,
+      builder: (context) => AiSummaryDialog(
+        originalTitle: note.title,
+        summary: result['summary'] ?? 'Özet oluşturulamadı',
+        originalLength: note.content.length,
+        summaryLength: (result['summary'] ?? '').length,
+        compressionRatio: result['compression_ratio']?.toDouble() ?? 0.0,
+      ),
+    );
+  }
+
+  void _showAiTagsDialog(Map<String, dynamic> result, Note note) {
+    final tags = (result['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+    showDialog(
+      context: context,
+      builder: (context) => AiTagsDialog(
+        tags: tags,
+        onTagSelected: (tag) {
+          // TODO: Implement tag selection logic
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Tag "$tag" seçildi'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _navigateToCreateNote() {
@@ -49,12 +85,12 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Note'),
-        content: Text('Are you sure you want to delete "$noteTitle"?'),
+        title: const Text('Notu Sil'),
+        content: Text('"$noteTitle" notunu silmek istediğinizden emin misiniz?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text('İptal'),
           ),
           TextButton(
             onPressed: () {
@@ -62,7 +98,7 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
               _deleteNote(noteId);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text('Sil'),
           ),
         ],
       ),
@@ -74,11 +110,11 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Note deleted'),
+        content: const Text('Not silindi'),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         action: SnackBarAction(
-          label: 'UNDO',
+          label: 'GERİ AL',
           onPressed: () {
             ref.read(notesViewModelProvider.notifier).restoreNote(noteId);
           },
@@ -92,8 +128,9 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
   Widget build(BuildContext context) {
     final notesState = ref.watch(notesViewModelProvider);
     final searchState = ref.watch(searchViewModelProvider);
+    final isSearching = ref.watch(searchViewModelProvider.notifier).currentQuery.isNotEmpty;
 
-    final displayNotes = _isSearching 
+    final displayNotes = isSearching 
         ? searchState
         : notesState.value ?? [];
 
@@ -108,7 +145,7 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text(
-          'Notes',
+          'Notlar',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -116,80 +153,111 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: _toggleSearch,
-            tooltip: _isSearching ? 'Close search' : 'Search notes',
-          ),
-        ],
       ),
       body: Column(
         children: [
-          // Search bar
-          if (_isSearching)
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: custom.SearchBar(
-                onChanged: (query) {
-                  final allNotes = notesState.value ?? [];
-                  ref.read(searchViewModelProvider.notifier).searchNotes(query, allNotes);
-                },
-                onClear: () {
-                  final allNotes = notesState.value ?? [];
-                  ref.read(searchViewModelProvider.notifier).clearSearch(allNotes);
-                },
-              ),
-            ),
+          // Modern Search Bar - Always visible
+          ModernSearchBar(
+            onSearch: _onSearch,
+            onClear: _onClearSearch,
+          ),
 
-          // Notes list
+          // Notes grid
           Expanded(
             child: notesState.when(
               data: (notes) {
                 if (sortedNotes.isEmpty) {
-                  return _buildEmptyState();
+                  return _buildEmptyState(isSearching);
                 }
 
                 return RefreshIndicator(
                   onRefresh: () async {
                     ref.invalidate(notesViewModelProvider);
                   },
-                  child: ListView.builder(
+                  child: MasonryGridView.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
                     padding: const EdgeInsets.all(16),
                     itemCount: sortedNotes.length,
                     itemBuilder: (context, index) {
                       final note = sortedNotes[index];
                       return NoteCard(
                         note: note,
+                        searchQuery: isSearching ? ref.read(searchViewModelProvider.notifier).currentQuery : null,
                         onTap: () => _navigateToNoteDetail(note.id),
                         onPin: () {
                           ref.read(notesViewModelProvider.notifier).togglePin(note.id);
                         },
                         onDelete: () => _showDeleteConfirmation(note.id, note.title),
-                        onSummarize: () {
-                          // TODO: Implement AI summarization
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('AI Summarization coming soon!'),
-                              behavior: SnackBarBehavior.floating,
+                        onSummarize: () async {
+                          if (_isSummarizing) return;
+                          setState(() {
+                            _isSummarizing = true;
+                          });
+                          
+                          // Show loading dialog
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const AiLoadingWidget(
+                              message: 'AI özet oluşturuluyor...',
                             ),
                           );
+                          
+                          try {
+                            final result = await ref.read(notesViewModelProvider.notifier).summarizeNote(note.id);
+                            if (mounted) {
+                              Navigator.of(context).pop(); // Close loading dialog
+                              if (result != null) {
+                                _showAiSummaryDialog(result, note);
+                              }
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isSummarizing = false;
+                              });
+                            }
+                          }
                         },
-                        onAutoTag: () {
-                          // TODO: Implement AI auto-tagging
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('AI Auto-tagging coming soon!'),
-                              behavior: SnackBarBehavior.floating,
+                        onAutoTag: () async {
+                          if (_isAutoTagging) return;
+                          setState(() {
+                            _isAutoTagging = true;
+                          });
+                          
+                          // Show loading dialog
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const AiLoadingWidget(
+                              message: 'AI etiketler oluşturuluyor...',
                             ),
                           );
+                          
+                          try {
+                            final result = await ref.read(notesViewModelProvider.notifier).autoTagNote(note.id);
+                            if (mounted) {
+                              Navigator.of(context).pop(); // Close loading dialog
+                              if (result != null) {
+                                _showAiTagsDialog(result, note);
+                              }
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isAutoTagging = false;
+                              });
+                            }
+                          }
                         },
                       );
                     },
                   ),
                 );
               },
-              loading: () => const custom.LoadingWidget(message: 'Loading notes...'),
+              loading: () => const custom.LoadingWidget(message: 'Notlar yükleniyor...'),
               error: (error, stack) => custom.ErrorWidget(
                 message: error.toString(),
                 onRetry: () {
@@ -202,12 +270,16 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToCreateNote,
-        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFFfeceab),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isSearching) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -219,42 +291,29 @@ class _NotesListPageState extends ConsumerState<NotesListPage> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              _isSearching ? Icons.search_off : Icons.note_add_outlined,
+              isSearching ? Icons.sentiment_very_dissatisfied  : Icons.note_add_outlined, //üzgün surat icon 
+
               size: 64,
               color: Theme.of(context).primaryColor,
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            _isSearching ? 'No results found' : 'No notes yet',
+            isSearching ? 'Aradığını bulamadık' : 'Henüz not yok',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            _isSearching 
-                ? 'Try a different search term'
-                : 'Create your first note to get started',
+            isSearching 
+                ? 'Burada öyle bir şey yok'
+                : 'Başlamak için ilk notunuzu oluşturun',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).textTheme.bodySmall?.color,
             ),
             textAlign: TextAlign.center,
           ),
-          if (!_isSearching) ...[
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _navigateToCreateNote,
-              icon: const Icon(Icons.add),
-              label: const Text('Create Note'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

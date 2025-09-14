@@ -8,6 +8,7 @@ class AppConstants {
   static const String notesBoxName = 'notes_box';
   static const String userBoxName = 'user_box';
   static const String syncQueueBoxName = 'sync_queue_box';
+  static const String appSettingsBoxName = 'app_settings_box';
   
   // UI
   static const double defaultPadding = 16.0;

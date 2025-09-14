@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
 import '../constants/app_constants.dart';
@@ -11,6 +12,7 @@ class LocalStorage {
   Box<Map>? _notesBox;
   Box<Map>? _userBox;
   Box<Map>? _syncQueueBox;
+  Box<Map>? _appSettingsBox;
   bool _isInitialized = false;
 
   /// Initialize Hive boxes
@@ -22,6 +24,7 @@ class LocalStorage {
     _notesBox = await Hive.openBox<Map>(AppConstants.notesBoxName);
     _userBox = await Hive.openBox<Map>(AppConstants.userBoxName);
     _syncQueueBox = await Hive.openBox<Map>(AppConstants.syncQueueBoxName);
+    _appSettingsBox = await Hive.openBox<Map>(AppConstants.appSettingsBoxName);
     
     _isInitialized = true;
     _logger.i('Local storage initialized');
@@ -29,7 +32,7 @@ class LocalStorage {
 
   /// Check if storage is initialized
   void _ensureInitialized() {
-    if (!_isInitialized || _notesBox == null || _userBox == null || _syncQueueBox == null) {
+    if (!_isInitialized || _notesBox == null || _userBox == null || _syncQueueBox == null || _appSettingsBox == null) {
       throw CacheException('Local storage not initialized. Call init() first.');
     }
   }
@@ -177,14 +180,59 @@ class LocalStorage {
     }
   }
 
+  /// Save app setting
+  Future<void> saveAppSetting(String key, dynamic value) async {
+    _ensureInitialized();
+    try {
+      await _appSettingsBox!.put(key, {'value': value});
+      _logger.d('Saved app setting: $key');
+    } catch (e) {
+      _logger.e('Error saving app setting: $e');
+      throw CacheException('Failed to save app setting');
+    }
+  }
+
+  /// Get app setting
+  Future<T?> getAppSetting<T>(String key) async {
+    _ensureInitialized();
+    try {
+      final settingData = _appSettingsBox!.get(key);
+      if (settingData != null) {
+        return settingData['value'] as T?;
+      }
+      return null;
+    } catch (e) {
+      _logger.e('Error getting app setting: $e');
+      throw CacheException('Failed to get app setting');
+    }
+  }
+
+  /// Remove app setting
+  Future<void> removeAppSetting(String key) async {
+    _ensureInitialized();
+    try {
+      await _appSettingsBox!.delete(key);
+      _logger.d('Removed app setting: $key');
+    } catch (e) {
+      _logger.e('Error removing app setting: $e');
+      throw CacheException('Failed to remove app setting');
+    }
+  }
+
   /// Close all boxes
   Future<void> close() async {
     if (_isInitialized) {
       await _notesBox?.close();
       await _userBox?.close();
       await _syncQueueBox?.close();
+      await _appSettingsBox?.close();
       _isInitialized = false;
       _logger.i('Local storage closed');
     }
   }
 }
+
+/// Provider for LocalStorage
+final localStorageProvider = Provider<LocalStorage>((ref) {
+  return LocalStorage();
+});

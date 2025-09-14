@@ -10,11 +10,14 @@ _$NoteImpl _$$NoteImplFromJson(Map<String, dynamic> json) => _$NoteImpl(
       id: json['id'] as String,
       title: json['title'] as String,
       content: json['content'] as String,
-      isPinned: json['isPinned'] as bool? ?? false,
-      userId: json['userId'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      isDeleted: json['isDeleted'] as bool? ?? false,
+      isPinned: json['is_pinned'] as bool? ?? false,
+      userId: json['user_id'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      isDeleted: json['is_deleted'] as bool? ?? false,
+      deletedAt: json['deleted_at'] == null
+          ? null
+          : DateTime.parse(json['deleted_at'] as String),
     );
 
 Map<String, dynamic> _$$NoteImplToJson(_$NoteImpl instance) =>
@@ -22,9 +25,10 @@ Map<String, dynamic> _$$NoteImplToJson(_$NoteImpl instance) =>
       'id': instance.id,
       'title': instance.title,
       'content': instance.content,
-      'isPinned': instance.isPinned,
-      'userId': instance.userId,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
-      'isDeleted': instance.isDeleted,
+      'is_pinned': instance.isPinned,
+      'user_id': instance.userId,
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+      'is_deleted': instance.isDeleted,
+      'deleted_at': instance.deletedAt?.toIso8601String(),
     };

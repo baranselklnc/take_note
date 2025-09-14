@@ -60,7 +60,7 @@ final networkInfoProvider = AutoDisposeProvider<NetworkInfo>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef NetworkInfoRef = AutoDisposeProviderRef<NetworkInfo>;
-String _$notesViewModelHash() => r'5cd2b969ada5a2c0ef500f8e2a413015dfd7c018';
+String _$notesViewModelHash() => r'3caba2bfd3da2ce22c1f4edd598bc242fa7c6d4f';
 
 /// Notes view model
 ///

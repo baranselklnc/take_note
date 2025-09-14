@@ -97,6 +97,12 @@ class ApiClient {
 
   /// Handle Dio exceptions
   Exception _handleDioException(DioException e) {
+    _logger.e('DioException: ${e.type}');
+    _logger.e('Status Code: ${e.response?.statusCode}');
+    _logger.e('Response Data: ${e.response?.data}');
+    _logger.e('Request URL: ${e.requestOptions.uri}');
+    _logger.e('Request Headers: ${e.requestOptions.headers}');
+    
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
@@ -104,14 +110,24 @@ class ApiClient {
         return NetworkException('Connection timeout');
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
-        final message = e.response?.data?['message'] ?? 'Server error';
+        final responseData = e.response?.data;
+        String message = 'Server error';
+        
+        if (responseData is Map<String, dynamic>) {
+          message = responseData['error'] ?? 
+                   responseData['message'] ?? 
+                   responseData['detail'] ?? 
+                   'Server error';
+        }
+        
+        _logger.e('Server error: $message (Status: $statusCode)');
         return ServerException(message, statusCode);
       case DioExceptionType.cancel:
         return NetworkException('Request cancelled');
       case DioExceptionType.connectionError:
         return NetworkException('No internet connection');
       default:
-        return NetworkException('Unknown network error');
+        return NetworkException('Unknown network error: ${e.message}');
     }
   }
 }

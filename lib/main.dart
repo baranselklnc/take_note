@@ -6,6 +6,8 @@ import 'shared/theme/app_theme.dart';
 import 'viewmodels/auth_viewmodel.dart';
 import 'views/auth/login_page.dart';
 import 'views/main/main_navigation_page.dart';
+import 'views/onboarding/onboarding_page.dart';
+import 'providers/onboarding_provider.dart';
 import 'core/constants/supabase_constants.dart';
 import 'services/server_discovery_service.dart';
 
@@ -42,15 +44,18 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authViewModelProvider);
+    final isOnboardingCompleted = ref.watch(onboardingProvider);
 
     return MaterialApp(
       title: 'Take Note',
       theme: AppTheme.lightTheme,
-      home: authState.when(
-        data: (user) => user != null ? const MainNavigationPage() : const LoginPage(),
-        loading: () => const ServerDiscoveryScreen(),
-        error: (error, stack) => const LoginPage(),
-      ),
+      home: isOnboardingCompleted
+          ? authState.when(
+              data: (user) => user != null ? const MainNavigationPage() : const LoginPage(),
+              loading: () => const ServerDiscoveryScreen(),
+              error: (error, stack) => const LoginPage(),
+            )
+          : const OnboardingPage(),
       debugShowCheckedModeBanner: false,
     );
   }
