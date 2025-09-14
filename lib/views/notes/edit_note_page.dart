@@ -22,8 +22,6 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   bool _isSaving = false;
-  String? _originalTitle;
-  String? _originalContent;
 
   @override
   void initState() {
@@ -41,8 +39,6 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
       
       _titleController.text = note.title;
       _contentController.text = note.content;
-      _originalTitle = note.title;
-      _originalContent = note.content;
     });
   }
 
@@ -91,36 +87,6 @@ class _EditNotePageState extends ConsumerState<EditNotePage> {
     }
   }
 
-  void _discardChanges() {
-    final hasChanges = _titleController.text.trim() != _originalTitle ||
-        _contentController.text.trim() != _originalContent;
-
-    if (hasChanges) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Discard Changes'),
-          content: const Text('Are you sure you want to discard your changes?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
-              child: const Text('Discard'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      Navigator.of(context).pop();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
