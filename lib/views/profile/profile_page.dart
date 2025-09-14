@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import '../../viewmodels/notes_viewmodel.dart';
 import '../../providers/theme_provider.dart';
+import '../../models/note.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -12,12 +14,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  // Mock data for settings
-  bool _notificationsEnabled = true;
-  bool _dataSharingEnabled = false;
-  bool _analyticsEnabled = true;
-  bool _crashReportingEnabled = false;
-  bool _marketingEmailsEnabled = false;
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -35,6 +31,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
+    final notesState = ref.watch(notesViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -46,7 +43,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         data: (user) {
           if (user == null) {
             return const Center(
-              child: Text('Not logged in'),
+              child: Text('Giriş yapılmamış'),
             );
           }
 
@@ -55,303 +52,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               children: [
                 // Profile Header
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: Text(
-                          user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        user.name.isNotEmpty ? user.name : 'User',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
+                _buildProfileHeader(context, user),
+                
+                const SizedBox(height: 24),
+                
+                // Statistics Section
+                _buildStatisticsSection(context, notesState),
                 
                 const SizedBox(height: 24),
                 
                 // Theme Section
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildThemeSettingsItem(context),
-                    ],
-                  ),
-                ),
+                _buildThemeSection(context),
                 
                 const SizedBox(height: 24),
                 
-                // Notifications Section
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildSettingsItem(
-                        context,
-                        icon: Icons.notifications_outlined,
-                        title: 'Bildirimler',
-                        subtitle: 'Uygulama bildirimlerini al',
-                        trailing: Switch(
-                          value: _notificationsEnabled,
-                          onChanged: (value) {
-                            setState(() {
-                              _notificationsEnabled = value;
-                            });
-                            _showSnackBar(
-                              value 
-                                ? 'Bildirim tercihiniz aktif olarak güncellendi'
-                                : 'Bildirim tercihiniz pasif olarak güncellendi'
-                            );
-                          },
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _notificationsEnabled = !_notificationsEnabled;
-                          });
-                          _showSnackBar(
-                            _notificationsEnabled 
-                              ? 'Bildirim tercihiniz aktif olarak güncellendi'
-                              : 'Bildirim tercihiniz pasif olarak güncellendi'
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Privacy & Security Section
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildSettingsItem(
-                        context,
-                        icon: Icons.dark_mode_outlined,
-                        title: 'Karanlık Mod',
-                        subtitle: 'Açık ve karanlık temalar arasında geçiş yap',
-                        trailing: Switch(
-                          value: Theme.of(context).brightness == Brightness.dark,
-                          onChanged: (value) {
-                            // TODO: Implement theme switching
-                          },
-                        ),
-                        onTap: () {
-                          // TODO: Implement theme switching
-                        },
-                      ),
-                      const Divider(height: 1),
-                      _buildSettingsItem(
-                        context,
-                        icon: Icons.analytics_outlined,
-                        title: 'Veri Paylaşımı',
-                        subtitle: 'Güvenlik ve gizlilik için verilerimi geliştirmek için paylaşıyorum',
-                        trailing: Switch(
-                          value: _dataSharingEnabled,
-                          onChanged: (value) {
-                            setState(() {
-                              _dataSharingEnabled = value;
-                            });
-                            _showSnackBar(
-                              value 
-                                ? 'Veri paylaşımı aktif olarak güncellendi'
-                                : 'Veri paylaşımı pasif olarak güncellendi'
-                            );
-                          },
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _dataSharingEnabled = !_dataSharingEnabled;
-                          });
-                          _showSnackBar(
-                            _dataSharingEnabled 
-                              ? 'Veri paylaşımı aktif olarak güncellendi'
-                              : 'Veri paylaşımı pasif olarak güncellendi'
-                          );
-                        },
-                      ),
-                      const Divider(height: 1),
-                      _buildSettingsItem(
-                        context,
-                        icon: Icons.analytics_outlined,
-                        title: 'Analitik Veriler',
-                        subtitle: 'Uygulama performansını iyileştirmek için analitik verileri paylaş',
-                        trailing: Switch(
-                          value: _analyticsEnabled,
-                          onChanged: (value) {
-                            setState(() {
-                              _analyticsEnabled = value;
-                            });
-                            _showSnackBar(
-                              value 
-                                ? 'Analitik veriler aktif olarak güncellendi'
-                                : 'Analitik veriler pasif olarak güncellendi'
-                            );
-                          },
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _analyticsEnabled = !_analyticsEnabled;
-                          });
-                          _showSnackBar(
-                            _analyticsEnabled 
-                              ? 'Analitik veriler aktif olarak güncellendi'
-                              : 'Analitik veriler pasif olarak güncellendi'
-                          );
-                        },
-                      ),
-                      const Divider(height: 1),
-                      _buildSettingsItem(
-                        context,
-                        icon: Icons.bug_report_outlined,
-                        title: 'Hata Raporlama',
-                        subtitle: 'Uygulama hatalarını otomatik olarak raporla',
-                        trailing: Switch(
-                          value: _crashReportingEnabled,
-                          onChanged: (value) {
-                            setState(() {
-                              _crashReportingEnabled = value;
-                            });
-                            _showSnackBar(
-                              value 
-                                ? 'Hata raporlama aktif olarak güncellendi'
-                                : 'Hata raporlama pasif olarak güncellendi'
-                            );
-                          },
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _crashReportingEnabled = !_crashReportingEnabled;
-                          });
-                          _showSnackBar(
-                            _crashReportingEnabled 
-                              ? 'Hata raporlama aktif olarak güncellendi'
-                              : 'Hata raporlama pasif olarak güncellendi'
-                          );
-                        },
-                      ),
-                      const Divider(height: 1),
-                      _buildSettingsItem(
-                        context,
-                        icon: Icons.email_outlined,
-                        title: 'Pazarlama E-postaları',
-                        subtitle: 'Yeni özellikler ve güncellemeler hakkında e-posta al',
-                        trailing: Switch(
-                          value: _marketingEmailsEnabled,
-                          onChanged: (value) {
-                            setState(() {
-                              _marketingEmailsEnabled = value;
-                            });
-                            _showSnackBar(
-                              value 
-                                ? 'Pazarlama e-postaları aktif olarak güncellendi'
-                                : 'Pazarlama e-postaları pasif olarak güncellendi'
-                            );
-                          },
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _marketingEmailsEnabled = !_marketingEmailsEnabled;
-                          });
-                          _showSnackBar(
-                            _marketingEmailsEnabled 
-                              ? 'Pazarlama e-postaları aktif olarak güncellendi'
-                              : 'Pazarlama e-postaları pasif olarak güncellendi'
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Logout Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      await ref.read(authViewModelProvider.notifier).logout();
-                      if (context.mounted) {
-                        context.go('/login');
-                      }
-                    },
-                    icon: const Icon(Icons.logout),
-                    label: const Text('Çıkış Yap'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
+                // Account Actions
+                _buildAccountActions(context),
               ],
             ),
           );
@@ -370,7 +86,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Something went wrong',
+                'Bir hata oluştu',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
@@ -386,53 +102,380 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildSettingsItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Widget trailing,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
+  Widget _buildProfileHeader(BuildContext context, user) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor,
+            Theme.of(context).primaryColor.withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.white,
+            child: Text(
+              user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            user.name.isNotEmpty ? user.name : 'Kullanıcı',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            user.email,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white70,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'Premium Üye',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatisticsSection(BuildContext context, AsyncValue<List<Note>> notesState) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.analytics_outlined,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'İstatistikler',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          notesState.when(
+            data: (notes) {
+              final totalNotes = notes.length;
+              final pinnedNotes = notes.where((note) => note.isPinned).length;
+              final totalCharacters = notes.fold<int>(0, (sum, note) => sum + note.content.length);
+              final avgNoteLength = totalNotes > 0 ? (totalCharacters / totalNotes).round() : 0;
+              
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Toplam Not',
+                            totalNotes.toString(),
+                            Icons.note_outlined,
+                            Colors.blue,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Sabitlenen',
+                            pinnedNotes.toString(),
+                            Icons.push_pin_outlined,
+                            Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Toplam Karakter',
+                            totalCharacters.toString(),
+                            Icons.text_fields_outlined,
+                            Colors.green,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Ort. Uzunluk',
+                            avgNoteLength.toString(),
+                            Icons.analytics_outlined,
+                            Colors.purple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            loading: () => const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, stack) => Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'İstatistikler yüklenemedi',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeSection(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.palette_outlined,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Tema Ayarları',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _buildThemeSettingsItem(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountActions(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.account_circle_outlined,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Hesap İşlemleri',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Colors.blue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                icon,
-                color: Theme.of(context).primaryColor,
+              child: const Icon(
+                Icons.edit_outlined,
+                color: Colors.blue,
                 size: 20,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
+            title: const Text('Profil Düzenle'),
+            subtitle: const Text('Adınızı ve e-posta adresinizi güncelleyin'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              _showSnackBar('Profil düzenleme özelliği yakında eklenecek');
+            },
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.security_outlined,
+                color: Colors.orange,
+                size: 20,
               ),
             ),
-            trailing,
-          ],
-        ),
+            title: const Text('Güvenlik'),
+            subtitle: const Text('Şifre değiştir ve güvenlik ayarları'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              _showSnackBar('Güvenlik ayarları yakında eklenecek');
+            },
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.logout,
+                color: Colors.red,
+                size: 20,
+              ),
+            ),
+            title: const Text('Çıkış Yap'),
+            subtitle: const Text('Hesabınızdan güvenli şekilde çıkış yapın'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () async {
+              await ref.read(authViewModelProvider.notifier).logout();
+              if (context.mounted) {
+                context.go('/login');
+              }
+            },
+          ),
+        ],
       ),
     );
   }
