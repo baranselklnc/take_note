@@ -11,7 +11,6 @@ class OnboardingNotifier extends StateNotifier<bool> {
 
   Future<void> _checkOnboardingStatus() async {
     try {
-      // Ensure storage is initialized before reading
       await _localStorage.init();
       final isCompleted = await _localStorage.getAppSetting<bool>(_onboardingKey) ?? false;
       state = isCompleted;
@@ -23,12 +22,10 @@ class OnboardingNotifier extends StateNotifier<bool> {
 
   Future<void> completeOnboarding() async {
     try {
-      // Ensure storage is initialized before saving
       await _localStorage.init();
       await _localStorage.saveAppSetting(_onboardingKey, true);
       state = true;
     } catch (e) {
-      // If storage fails, still mark onboarding as completed in memory
       state = true;
     }
   }
