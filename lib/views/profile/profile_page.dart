@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import '../../providers/theme_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -91,6 +92,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         user.email,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Theme Section
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildThemeSettingsItem(context),
                     ],
                   ),
                 ),
@@ -407,5 +431,75 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ),
     );
+  }
+
+  Widget _buildThemeSettingsItem(BuildContext context) {
+    final themeMode = ref.watch(themeProvider);
+    
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+          color: Theme.of(context).primaryColor,
+          size: 20,
+        ),
+      ),
+      title: const Text('Tema'),
+      subtitle: Text(_getThemeModeText(themeMode)),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.light_mode,
+              color: themeMode == ThemeMode.light 
+                  ? Theme.of(context).primaryColor 
+                  : Theme.of(context).textTheme.bodySmall?.color,
+            ),
+            onPressed: () {
+              ref.read(themeProvider.notifier).setThemeMode(ThemeMode.light);
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.dark_mode,
+              color: themeMode == ThemeMode.dark 
+                  ? Theme.of(context).primaryColor 
+                  : Theme.of(context).textTheme.bodySmall?.color,
+            ),
+            onPressed: () {
+              ref.read(themeProvider.notifier).setThemeMode(ThemeMode.dark);
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.settings_system_daydream,
+              color: themeMode == ThemeMode.system 
+                  ? Theme.of(context).primaryColor 
+                  : Theme.of(context).textTheme.bodySmall?.color,
+            ),
+            onPressed: () {
+              ref.read(themeProvider.notifier).setThemeMode(ThemeMode.system);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getThemeModeText(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Açık tema';
+      case ThemeMode.dark:
+        return 'Karanlık tema';
+      case ThemeMode.system:
+        return 'Sistem teması';
+    }
   }
 }
