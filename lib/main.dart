@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'shared/theme/app_theme.dart';
 import 'viewmodels/auth_viewmodel.dart';
 import 'views/auth/login_page.dart';
-import 'views/notes/notes_list_page.dart';
+import 'views/main/main_navigation_page.dart';
 import 'core/constants/supabase_constants.dart';
 import 'services/server_discovery_service.dart';
 
@@ -47,7 +47,7 @@ class MainApp extends ConsumerWidget {
       title: 'Take Note',
       theme: AppTheme.lightTheme,
       home: authState.when(
-        data: (user) => user != null ? const NotesListPage() : const LoginPage(),
+        data: (user) => user != null ? const MainNavigationPage() : const LoginPage(),
         loading: () => const ServerDiscoveryScreen(),
         error: (error, stack) => const LoginPage(),
       ),
