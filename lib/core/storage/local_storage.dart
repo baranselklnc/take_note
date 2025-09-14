@@ -128,11 +128,14 @@ class LocalStorage {
   Future<void> clearUser() async {
     _ensureInitialized();
     try {
-      await _userBox!.clear();
-      _logger.d('Cleared user data');
+      if (_userBox != null && _userBox!.isOpen) {
+        await _userBox!.clear();
+        _logger.d('Cleared user data');
+      }
     } catch (e) {
       _logger.e('Error clearing user: $e');
-      throw CacheException('Failed to clear user data');
+      // Don't throw exception, just log the error
+      // This prevents logout from failing
     }
   }
 

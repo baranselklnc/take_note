@@ -44,7 +44,8 @@ class StorageService {
       _logger.d('User data cleared');
     } catch (e) {
       _logger.e('Error clearing user: $e');
-      throw CacheException('Failed to clear user data');
+      // Don't throw exception, just log the error
+      // This prevents logout from failing
     }
   }
 

@@ -89,8 +89,12 @@ class AuthViewModel extends _$AuthViewModel {
       _logger.i('User logged out');
     } catch (e) {
       // Even if logout fails, clear local data
-      final storageService = ref.read(storageServiceProvider);
-      await storageService.clearUser();
+      try {
+        final storageService = ref.read(storageServiceProvider);
+        await storageService.clearUser();
+      } catch (clearError) {
+        _logger.e('Error clearing user data: $clearError');
+      }
       state = const AsyncValue.data(null);
       _logger.e('Logout error: $e');
     }

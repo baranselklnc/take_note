@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import '../../providers/theme_provider.dart';
 
@@ -335,6 +336,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       await ref.read(authViewModelProvider.notifier).logout();
+                      if (context.mounted) {
+                        context.go('/login');
+                      }
                     },
                     icon: const Icon(Icons.logout),
                     label: const Text('Çıkış Yap'),
