@@ -7,14 +7,16 @@ import '../core/storage/local_storage.dart';
 
 part 'auth_viewmodel.g.dart';
 
-/// Authentication view model
+
+
+
 @riverpod
 class AuthViewModel extends _$AuthViewModel {
   final Logger _logger = Logger();
 
   @override
   Future<User?> build() async {
-    // Try to get user from local storage on app start
+
     try {
       final storageService = ref.read(storageServiceProvider);
       return await storageService.getCurrentUser();
@@ -24,7 +26,7 @@ class AuthViewModel extends _$AuthViewModel {
     }
   }
 
-  /// Login user
+
   Future<void> login(String email, String password) async {
     state = const AsyncValue.loading();
     
@@ -33,19 +35,20 @@ class AuthViewModel extends _$AuthViewModel {
       
       final user = await supabaseService.signIn(email, password);
       
-      // Try to save user to local storage, but don't fail if it doesn't work
+
       try {
         final storageService = ref.read(storageServiceProvider);
         await storageService.saveUser(user);
       } catch (storageError) {
         _logger.w('Failed to save user to local storage: $storageError');
-        // Continue anyway - user is still authenticated via Supabase
+
       }
       
       state = AsyncValue.data(user);
       _logger.i('User logged in: ${user.email}');
     } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
+      String userFriendlyMessage = _getUserFriendlyErrorMessage(e);
+      state = AsyncValue.error(userFriendlyMessage, StackTrace.current);
       _logger.e('Login failed: $e');
     }
   }
@@ -59,7 +62,7 @@ class AuthViewModel extends _$AuthViewModel {
       
       final user = await supabaseService.signUp(name, email, password);
       
-      // Try to save user to local storage, but don't fail if it doesn't work
+      
       try {
         final storageService = ref.read(storageServiceProvider);
         await storageService.saveUser(user);
@@ -71,12 +74,13 @@ class AuthViewModel extends _$AuthViewModel {
       state = AsyncValue.data(user);
       _logger.i('User signed up: ${user.email}');
     } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
+      String userFriendlyMessage = _getUserFriendlyErrorMessage(e);
+      state = AsyncValue.error(userFriendlyMessage, StackTrace.current);
       _logger.e('Signup failed: $e');
     }
   }
 
-  /// Logout user
+  
   Future<void> logout() async {
     try {
       final supabaseService = ref.read(supabaseServiceProvider);
@@ -88,7 +92,7 @@ class AuthViewModel extends _$AuthViewModel {
       state = const AsyncValue.data(null);
       _logger.i('User logged out');
     } catch (e) {
-      // Even if logout fails, clear local data
+  
       try {
         final storageService = ref.read(storageServiceProvider);
         await storageService.clearUser();
@@ -100,7 +104,6 @@ class AuthViewModel extends _$AuthViewModel {
     }
   }
 
-  /// Check if user is authenticated
   bool get isAuthenticated {
     return state.value != null;
   }
@@ -108,6 +111,47 @@ class AuthViewModel extends _$AuthViewModel {
   /// Get current user
   User? get currentUser {
     return state.value;
+  }
+
+  String _getUserFriendlyErrorMessage(dynamic error) {
+    final errorString = error.toString().toLowerCase();
+    
+    if (errorString.contains('invalid login credentials') || 
+        errorString.contains('invalid_credentials')) {
+      return 'E-posta adresi veya şifre hatalı. Lütfen bilgilerinizi kontrol edin.';
+    }
+    
+    if (errorString.contains('user not found')) {
+      return 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.';
+    }
+    
+    if (errorString.contains('email not confirmed')) {
+      return 'E-posta adresinizi doğrulamanız gerekiyor. Lütfen e-posta kutunuzu kontrol edin.';
+    }
+    
+    if (errorString.contains('user already registered') || 
+        errorString.contains('email already registered')) {
+      return 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
+    }
+    
+    if (errorString.contains('password should be at least')) {
+      return 'Şifre en az 6 karakter olmalıdır.';
+    }
+    
+    if (errorString.contains('invalid email')) {
+      return 'Geçerli bir e-posta adresi girin.';
+    }
+    
+    if (errorString.contains('network') || errorString.contains('connection')) {
+      return 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.';
+    }
+    
+    if (errorString.contains('timeout')) {
+      return 'İşlem zaman aşımına uğradı. Lütfen tekrar deneyin.';
+    }
+    
+    // Varsayılan mesaj
+    return 'Bir hata oluştu. Lütfen tekrar deneyin.';
   }
 }
 
