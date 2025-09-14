@@ -298,19 +298,16 @@ class NotesViewModel extends _$NotesViewModel {
         }
         
         try {
-          // Try to restore note via backend API first
           await apiService.restoreNote(id);
           _logger.d('Note restored via API: $id');
           
-          // Reload notes from backend to get updated state
-          ref.refresh(notesViewModelProvider);
+          ref.invalidate(notesViewModelProvider);
           
           _logger.d('Note restored successfully via API: $id');
           return true;
         } catch (apiError) {
           _logger.w('Backend API not available, restoring note locally: $apiError');
           
-          // Fallback: Restore locally
           final storageService = ref.read(storageServiceProvider);
           final currentNotes = await future;
           final noteIndex = currentNotes.indexWhere((note) => note.id == id);
@@ -352,7 +349,6 @@ class NotesViewModel extends _$NotesViewModel {
       final authUser = ref.read(authViewModelProvider).value;
       
       if (authUser != null) {
-        // Set auth token for API calls
         final supabaseService = ref.read(supabaseServiceProvider);
         final session = supabaseService.supabase.auth.currentSession;
         if (session != null) {
@@ -360,7 +356,6 @@ class NotesViewModel extends _$NotesViewModel {
         }
         
         try {
-          // Try to toggle pin via backend API first
           final toggledNote = await apiService.togglePinNote(id);
           _logger.d('Note pin toggled via API: $id');
           
@@ -396,7 +391,6 @@ class NotesViewModel extends _$NotesViewModel {
               updatedAt: DateTime.now(),
             );
             
-            // Try to save to local storage, but don't fail if it doesn't work
             try {
               final storageService = ref.read(storageServiceProvider);
               await storageService.saveNote(toggledNote);
@@ -404,7 +398,6 @@ class NotesViewModel extends _$NotesViewModel {
               _logger.w('Failed to save pinned note to local storage: $storageError');
             }
             
-            // Update state and in-memory storage
             final updatedNotes = [...currentNotes];
             updatedNotes[noteIndex] = toggledNote;
             state = AsyncValue.data(updatedNotes);
@@ -425,7 +418,6 @@ class NotesViewModel extends _$NotesViewModel {
   /// Summarize note using AI
   Future<Map<String, dynamic>?> summarizeNote(String id) async {
     try {
-      // Check if note ID is UUID format (backend note)
       if (!_isValidUuid(id)) {
         _logger.w('Cannot summarize local note with ID: $id');
         return {
@@ -438,7 +430,6 @@ class NotesViewModel extends _$NotesViewModel {
       final authUser = ref.read(authViewModelProvider).value;
       
       if (authUser != null) {
-        // Set auth token for API calls
         final supabaseService = ref.read(supabaseServiceProvider);
         final session = supabaseService.supabase.auth.currentSession;
         if (session != null) {
@@ -490,10 +481,8 @@ class NotesViewModel extends _$NotesViewModel {
     }
   }
 
-  /// Auto tag note using AI
   Future<Map<String, dynamic>?> autoTagNote(String id) async {
     try {
-      // Check if note ID is UUID format (backend note)
       if (!_isValidUuid(id)) {
         _logger.w('Cannot auto-tag local note with ID: $id');
         return {
@@ -536,7 +525,6 @@ class NotesViewModel extends _$NotesViewModel {
     }
   }
 
-  /// Categorize note using AI
   Future<Map<String, dynamic>?> categorizeNote(String id) async {
     try {
       final apiService = ref.read(apiServiceProvider);
@@ -567,7 +555,6 @@ class NotesViewModel extends _$NotesViewModel {
     }
   }
 
-  /// AI process note (all AI features)
   Future<Map<String, dynamic>?> aiProcessNote(String id) async {
     try {
       final apiService = ref.read(apiServiceProvider);
@@ -598,7 +585,6 @@ class NotesViewModel extends _$NotesViewModel {
     }
   }
 
-  /// Search notes using backend API
   Future<List<Note>> searchNotes(String query) async {
     try {
       final apiService = ref.read(apiServiceProvider);
@@ -635,7 +621,6 @@ class NotesViewModel extends _$NotesViewModel {
     }
   }
 
-  /// Check if string is a valid UUID
   bool _isValidUuid(String id) {
     final uuidRegex = RegExp(
       r'^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
@@ -646,20 +631,17 @@ class NotesViewModel extends _$NotesViewModel {
 
 }
 
-/// API service provider
 @riverpod
 ApiService apiService(ApiServiceRef ref) {
   final apiClient = ref.read(apiClientProvider);
   return ApiService(apiClient);
 }
 
-/// API client provider
 @riverpod
 ApiClient apiClient(ApiClientRef ref) {
   return ApiClient();
 }
 
-/// Network info provider
 @riverpod
 NetworkInfo networkInfo(NetworkInfoRef ref) {
   return NetworkInfo();
