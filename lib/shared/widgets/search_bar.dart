@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../../core/constants/app_constants.dart';
 
 /// Search bar widget
@@ -56,25 +55,34 @@ class _SearchBarState extends State<SearchBar> {
     return Container(
       margin: const EdgeInsets.all(AppConstants.defaultPadding),
       decoration: BoxDecoration(
-        color: AppTheme.searchBarColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: TextField(
         controller: _controller,
         onChanged: _onSearchChanged,
         decoration: InputDecoration(
           hintText: widget.hintText,
-          hintStyle: AppTheme.bodyMedium,
-          prefixIcon: const Icon(
+          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).textTheme.bodySmall?.color,
+          ),
+          prefixIcon: Icon(
             Icons.search,
-            color: AppTheme.textSecondary,
+            color: Theme.of(context).textTheme.bodySmall?.color,
           ),
           suffixIcon: _controller.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.clear,
-                    color: AppTheme.textSecondary,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                   onPressed: _clearSearch,
                 )
