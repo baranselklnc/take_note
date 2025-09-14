@@ -57,12 +57,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('Sign Up'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppTheme.textPrimary,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
       ),
       body: SafeArea(
         child: Padding(
@@ -76,13 +76,13 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   // Title
                   Text(
                     'Create Account',
-                    style: AppTheme.headlineLarge,
+                    style: Theme.of(context).textTheme.headlineLarge,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppConstants.smallPadding),
                   Text(
                     'Sign up to start taking notes',
-                    style: AppTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppConstants.largePadding),
@@ -231,7 +231,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     children: [
                       Text(
                         'Already have an account? ',
-                        style: AppTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
