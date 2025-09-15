@@ -1,5 +1,9 @@
 # Take Note - Flutter Not Uygulaması
 
+<div align="center">
+  <img src="android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="Take Note App Icon" width="128" height="128">
+</div>
+
 Flutter ile geliştirilmiş, gelişmiş arama özellikleri, offline destek ve akıllı not işleme özelliklerine sahip modern, AI destekli bir not alma uygulaması.
 
 ## Özellikler
